@@ -2,7 +2,7 @@ import urllib.request
 import requests
 from lxml import html
 import pandas as pd
-import re
+import re, os
 
 BASE_URI = "http://nmma.nic.in/nmma/"
 
@@ -17,5 +17,8 @@ def gen_state_list():
         d.append([state_name, l.get('href'), entries])
     df = pd.DataFrame(d, columns=["state", "url", "entries"])
     df.index.name = "index"
-    df.to_csv(open("nmma-states.csv", "w+"))
+    df.to_csv(open(os.path.join("lists", "nmma-states.csv"), "w+"))
     return
+
+if __name__ == '__main__':
+    gen_state_list()
