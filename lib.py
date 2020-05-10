@@ -2,7 +2,7 @@ import urllib.request
 import requests
 from lxml import html
 import pandas as pd
-import re, unicodedata
+import re, unicodedata, os
 
 BASE_URI = "http://nmma.nic.in/nmma/"
 
@@ -21,7 +21,7 @@ def gen_state_entries(state, url, max_count):
             d.append([acc_no, name, cont_url])
         cur += 50
     df = pd.DataFrame(d, columns=["ref no", "name", "url"])
-    df.to_csv(open(state.replace(" ", "") + "-list.csv", "w+"), index=False)
+    df.to_csv(open(os.path.join("lists", state.replace(" ", "") + "-list.csv"), "w+"), index=False)
     return
    
 def remove_nonlatin(s): 
@@ -48,10 +48,13 @@ def gen_data_for_entries(csvdat, fr, to, filename):
     df = pd.read_csv(csvdat)
     all_rows = df.iterrows()
     count = 0
+    if to == -1:
+        to = df.shape[0] - 1
     for index, row in all_rows:
         if count < fr or count > to:
             count += 1
             continue
+        print('Downloading', count-fr+1, '/', to-fr+1)
         url = str(row[2])
         name = str(row[1])
         url_full = str(BASE_URI) + str(url)
@@ -71,6 +74,7 @@ def gen_data_for_entries(csvdat, fr, to, filename):
                 data[ind] = val
         d.append(data)
         count += 1
+    print('Done!')
     pd_df = pd.DataFrame(d)
-    pd_df.to_csv(filename + '.csv', index=False)
+    pd_df.to_csv(os.path.join("files", filename), index=False)
     return pd_df
